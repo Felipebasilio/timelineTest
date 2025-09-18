@@ -1,0 +1,218 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.timeline-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.timeline-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e1e5e9;
+  background: #fafbfc;
+}
+
+.timeline-header h2 {
+  margin: 0 0 8px 0;
+  color: #172b4d;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.timeline-header p {
+  margin: 0;
+  color: #6b778c;
+  font-size: 14px;
+}
+
+/* Timeline ruler */
+.timeline-ruler {
+  position: relative;
+  height: 60px;
+  background: #f4f5f7;
+  border-bottom: 1px solid #dfe1e6;
+  overflow-x: auto;
+}
+
+.month-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.month-line {
+  width: 1px;
+  height: 20px;
+  background: #8993a4;
+  margin-left: -0.5px;
+}
+
+.month-label {
+  font-size: 12px;
+  color: #5e6c84;
+  margin-top: 4px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Timeline lanes */
+.timeline-lanes {
+  overflow-x: auto;
+}
+
+.timeline-lane {
+  display: flex;
+  border-bottom: 1px solid #f4f5f7;
+  min-height: 80px;
+  position: relative;
+}
+
+.timeline-lane:hover {
+  background-color: #f8f9fa;
+}
+
+.lane-number {
+  flex-shrink: 0;
+  width: 100px;
+  padding: 16px 20px;
+  background: #fafbfc;
+  border-right: 1px solid #dfe1e6;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5e6c84;
+  display: flex;
+  align-items: center;
+}
+
+.lane-content {
+  flex: 1;
+  position: relative;
+  padding: 12px 0;
+  min-height: 56px;
+}
+
+/* Timeline items */
+.timeline-item {
+  position: absolute;
+  top: 12px;
+  height: 56px;
+  background: linear-gradient(135deg, #0052cc 0%, #0065ff 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 4px;
+  min-width: 120px;
+}
+
+.timeline-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.timeline-item:nth-child(even) {
+  background: linear-gradient(135deg, #36b37e 0%, #00a86b 100%);
+}
+
+.timeline-item:nth-child(3n) {
+  background: linear-gradient(135deg, #ff5630 0%, #ff7452 100%);
+}
+
+.timeline-item:nth-child(4n) {
+  background: linear-gradient(135deg, #6554c0 0%, #8777d9 100%);
+}
+
+.timeline-item:nth-child(5n) {
+  background: linear-gradient(135deg, #ff8b00 0%, #ffab00 100%);
+}
+
+.item-content {
+  padding: 8px 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  overflow: hidden;
+}
+
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-dates {
+  font-size: 11px;
+  opacity: 0.9;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app {
+    padding: 10px;
+  }
+  
+  .timeline-container {
+    border-radius: 0;
+  }
+  
+  .lane-number {
+    width: 80px;
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  
+  .timeline-item {
+    min-width: 100px;
+    height: 48px;
+  }
+  
+  .item-content {
+    padding: 6px 10px;
+  }
+  
+  .item-name {
+    font-size: 12px;
+  }
+  
+  .item-dates {
+    font-size: 10px;
+  }
+}
+
+/* For very small timeline items, hide dates to save space */
+.timeline-item[style*="width: 0%"], 
+.timeline-item[style*="width: 1%"], 
+.timeline-item[style*="width: 2%"] {
+  min-width: 80px;
+}
+
+.timeline-item[style*="width: 0%"] .item-dates, 
+.timeline-item[style*="width: 1%"] .item-dates, 
+.timeline-item[style*="width: 2%"] .item-dates {
+  display: none;
+}

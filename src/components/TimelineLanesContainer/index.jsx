@@ -2,13 +2,15 @@ import React from 'react';
 import { TimelineLane } from '../index';
 
 /**
- * TimelineLanesContainer component - container for all timeline lanes
+ * TimelineLanesContainer component - container for all timeline lanes with zoom support
  * @param {Object} props - Component props
  * @param {Array} props.lanes - Array of lanes, each containing timeline items
- * @param {Date} props.timelineStart - Start date of the timeline
- * @param {number} props.totalDays - Total number of days in the timeline
+ * @param {Date} props.timelineStart - Original timeline start date
+ * @param {Date} props.visibleStart - Visible timeline start date (for zoom)
+ * @param {number} props.visibleDays - Number of visible days (for zoom)
+ * @param {number} props.zoomLevel - Current zoom level
  */
-const TimelineLanesContainer = ({ lanes, timelineStart, totalDays }) => {
+const TimelineLanesContainer = ({ lanes, timelineStart, visibleStart, visibleDays, zoomLevel }) => {
   return (
     <div className="timeline-lanes">
       {lanes.map((lane, laneIndex) => (
@@ -17,7 +19,9 @@ const TimelineLanesContainer = ({ lanes, timelineStart, totalDays }) => {
           lane={lane}
           laneIndex={laneIndex}
           timelineStart={timelineStart}
-          totalDays={totalDays}
+          visibleStart={visibleStart}
+          visibleDays={visibleDays}
+          zoomLevel={zoomLevel}
         />
       ))}
     </div>

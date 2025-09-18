@@ -1,9 +1,7 @@
 import React from 'react';
-import assignLanes from '../assignLanes.js';
-import { calculateTimelineBoundaries, calculateTotalDays } from '../utils.js';
-import TimelineHeader from './TimelineHeader.js';
-import TimelineRuler from './TimelineRuler.js';
-import TimelineLanesContainer from './TimelineLanesContainer.js';
+import assignLanes from '../../assignLanes.js';
+import { calculateTimelineBoundaries, calculateTotalDays } from '../../utils.js';
+import { TimelineHeader, TimelineRuler, TimelineLanesContainer } from '../index';
 
 /**
  * TimelineContainer component - main container for the entire timeline

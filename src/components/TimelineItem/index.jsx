@@ -1,5 +1,5 @@
 import React from 'react';
-import { calculateItemPosition, createItemTooltip } from '../utils.js';
+import { calculateItemPosition, createItemTooltip } from '../../utils.js';
 
 /**
  * TimelineItem component - represents a single item on the timeline

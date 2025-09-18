@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import timelineItems from "./timelineItems.js";
-import TimelineContainer from "./components/TimelineContainer.js";
+import { TimelineContainer } from "./components";
 
 /**
  * App component - root component of the application

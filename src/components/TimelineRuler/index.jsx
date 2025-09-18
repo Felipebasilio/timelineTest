@@ -1,5 +1,5 @@
 import React from 'react';
-import { generateMonthMarkers, formatMonthLabel } from '../utils.js';
+import { generateMonthMarkers, formatMonthLabel } from '../../utils.js';
 
 /**
  * TimelineRuler component - displays month markers for the timeline

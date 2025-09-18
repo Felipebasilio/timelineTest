@@ -1,5 +1,5 @@
 import React from 'react';
-import TimelineLane from './TimelineLane.js';
+import { TimelineLane } from '../index';
 
 /**
  * TimelineLanesContainer component - container for all timeline lanes

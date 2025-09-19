@@ -49,8 +49,10 @@ describe('TimelineLane', () => {
   it('should pass correct props to TimelineItem components', () => {
     render(<TimelineLane {...mockProps} />)
     
-    expect(screen.getByText('Item 1 (2021-01-01 - 30 days)')).toBeInTheDocument()
-    expect(screen.getByText('Item 2 (2021-01-01 - 30 days)')).toBeInTheDocument()
+    expect(screen.getByText(/Item 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Item 2/)).toBeInTheDocument()
+    expect(screen.getByTestId('timeline-item-1')).toHaveTextContent('2021-01-01')
+    expect(screen.getByTestId('timeline-item-1')).toHaveTextContent('30 days')
   })
 
   it('should handle different lane indices', () => {

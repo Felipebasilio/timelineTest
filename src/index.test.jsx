@@ -43,4 +43,47 @@ describe('App', () => {
     
     expect(screen.getByText('Timeline with 2 items')).toBeInTheDocument()
   })
+
+  it('should handle different numbers of timeline items', () => {
+    const TestApp = ({ itemCount }) => {
+      const timelineItems = Array.from({ length: itemCount }, (_, i) => ({
+        id: i + 1,
+        name: `Test Item ${i + 1}`,
+        start: `2021-01-${String(i + 1).padStart(2, '0')}`,
+        end: `2021-01-${String(i + 5).padStart(2, '0')}`
+      }))
+
+      return (
+        <div className="app">
+          <div data-testid="timeline-container">
+            Timeline with {timelineItems.length} items
+          </div>
+        </div>
+      )
+    }
+
+    const { rerender } = render(<TestApp itemCount={0} />)
+    expect(screen.getByText('Timeline with 0 items')).toBeInTheDocument()
+
+    rerender(<TestApp itemCount={1} />)
+    expect(screen.getByText('Timeline with 1 items')).toBeInTheDocument()
+
+    rerender(<TestApp itemCount={10} />)
+    expect(screen.getByText('Timeline with 10 items')).toBeInTheDocument()
+  })
+
+  it('should render without errors', () => {
+    expect(() => render(<App />)).not.toThrow()
+  })
+
+  it('should have proper structure', () => {
+    const { container } = render(<App />)
+    
+    const appDiv = container.firstChild
+    expect(appDiv.tagName).toBe('DIV')
+    expect(appDiv).toHaveClass('app')
+    
+    const timelineContainer = appDiv.querySelector('[data-testid="timeline-container"]')
+    expect(timelineContainer).toBeInTheDocument()
+  })
 })

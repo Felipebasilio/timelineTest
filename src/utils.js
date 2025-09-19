@@ -149,7 +149,7 @@ export const calculateVisibleRange = (timelineStart, timelineEnd, zoomLevel, cen
   const visibleEnd = new Date(timelineStart);
   visibleEnd.setDate(visibleEnd.getDate() + Math.min(totalDays, visibleEndDays));
   
-  return { visibleStart, visibleEnd };
+  return { visibleStart, visibleEnd, visibleDays };
 };
 
 /**
@@ -272,7 +272,7 @@ export const calculateVisibleRangeWithMouse = (timelineStart, timelineEnd, zoomL
   const visibleEnd = new Date(timelineStart);
   visibleEnd.setDate(visibleEnd.getDate() + Math.min(totalDays, visibleEndDays));
   
-  return { visibleStart, visibleEnd };
+  return { visibleStart, visibleEnd, visibleDays };
 };
 
 /**

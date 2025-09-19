@@ -129,6 +129,7 @@ const TimelineContainer = ({ items }) => {
         visibleStart={visibleStart}
         visibleEnd={visibleEnd}
         visibleDays={visibleDays}
+        totalDays={totalDays}
         zoomLevel={zoomLevel}
       />
       
@@ -137,6 +138,7 @@ const TimelineContainer = ({ items }) => {
         timelineStart={timelineStart}
         visibleStart={visibleStart}
         visibleDays={visibleDays}
+        totalDays={totalDays}
         zoomLevel={zoomLevel}
       />
     </div>

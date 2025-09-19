@@ -9,6 +9,7 @@ import { generateMonthMarkers, generateMonthMarkersWithZoom, formatMonthLabel } 
  * @param {Date} props.visibleStart - Visible timeline start date (for zoom)
  * @param {Date} props.visibleEnd - Visible timeline end date (for zoom)
  * @param {number} props.visibleDays - Number of visible days (for zoom)
+ * @param {number} props.totalDays - Total number of days in timeline
  * @param {number} props.zoomLevel - Current zoom level
  */
 const TimelineRuler = ({ 
@@ -17,6 +18,7 @@ const TimelineRuler = ({
   visibleStart, 
   visibleEnd, 
   visibleDays, 
+  totalDays,
   zoomLevel 
 }) => {
   // Use zoom-aware month markers if zoom is not at default level

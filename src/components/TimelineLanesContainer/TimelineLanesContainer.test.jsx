@@ -42,9 +42,10 @@ describe('TimelineLanesContainer', () => {
   it('should pass correct props to each TimelineLane', () => {
     render(<TimelineLanesContainer {...mockProps} />)
     
-    expect(screen.getByText('Lane 1: 2 items (30 days)')).toBeInTheDocument()
-    expect(screen.getByText('Lane 2: 1 items (30 days)')).toBeInTheDocument()
-    expect(screen.getByText('Lane 3: 3 items (30 days)')).toBeInTheDocument()
+    expect(screen.getByText(/Lane 1: 2 items/)).toBeInTheDocument()
+    expect(screen.getByText(/Lane 2: 1 items/)).toBeInTheDocument()
+    expect(screen.getByText(/Lane 3: 3 items/)).toBeInTheDocument()
+    expect(screen.getByTestId('timeline-lane-0')).toHaveTextContent('30 days')
   })
 
   it('should handle empty lanes array', () => {

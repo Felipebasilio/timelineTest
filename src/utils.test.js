@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   calculateDaysBetween,
   calculateTimelineBoundaries,
@@ -18,7 +18,12 @@ import {
   getMousePositionPercentage,
   calculateVisibleRangeWithMouse,
   calculateWheelZoom,
-  handleMouseWheelZoom
+  handleMouseWheelZoom,
+  INLINE_EDIT_CONFIG,
+  validateItemName,
+  sanitizeItemName,
+  handleInlineEditKeyDown,
+  createDebouncedFunction
 } from './utils.js'
 
 describe('utils.js', () => {
@@ -465,6 +470,278 @@ describe('utils.js', () => {
       handleMouseWheelZoom(event, container, new Date('2021-01-01'), new Date('2021-12-31'), currentZoom, onZoomChange, onCenterChange)
       
       expect(event.preventDefault).toHaveBeenCalled()
+    })
+
+    it('should not handle wheel events without Ctrl/Cmd key', () => {
+      const currentZoom = 1.0
+      const event = {
+        deltaY: -100,
+        clientX: 100,
+        ctrlKey: false,
+        metaKey: false,
+        preventDefault: vi.fn()
+      }
+      const container = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 200
+        })
+      }
+      const onZoomChange = vi.fn()
+      const onCenterChange = vi.fn()
+
+      handleMouseWheelZoom(event, container, new Date('2021-01-01'), new Date('2021-12-31'), currentZoom, onZoomChange, onCenterChange)
+      
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(onZoomChange).not.toHaveBeenCalled()
+      expect(onCenterChange).not.toHaveBeenCalled()
+    })
+
+    it('should handle wheel events with Cmd key on Mac', () => {
+      const currentZoom = 1.0
+      const event = {
+        deltaY: -100,
+        clientX: 100,
+        ctrlKey: false,
+        metaKey: true,
+        preventDefault: vi.fn()
+      }
+      const container = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 200
+        })
+      }
+      const onZoomChange = vi.fn()
+      const onCenterChange = vi.fn()
+
+      handleMouseWheelZoom(event, container, new Date('2021-01-01'), new Date('2021-12-31'), currentZoom, onZoomChange, onCenterChange)
+      
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(onZoomChange).toHaveBeenCalled()
+      expect(onCenterChange).toHaveBeenCalled()
+    })
+
+    it('should not update if zoom level change is too small', () => {
+      const currentZoom = 1.0
+      const event = {
+        deltaY: 1, // Very small delta
+        clientX: 100,
+        ctrlKey: true,
+        preventDefault: vi.fn()
+      }
+      const container = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 200
+        })
+      }
+      const onZoomChange = vi.fn()
+      const onCenterChange = vi.fn()
+
+      handleMouseWheelZoom(event, container, new Date('2021-01-01'), new Date('2021-12-31'), currentZoom, onZoomChange, onCenterChange)
+      
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(onZoomChange).not.toHaveBeenCalled()
+      expect(onCenterChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('INLINE_EDIT_CONFIG constant', () => {
+    it('should have correct inline edit configuration', () => {
+      expect(INLINE_EDIT_CONFIG.MIN_NAME_LENGTH).toBe(1)
+      expect(INLINE_EDIT_CONFIG.MAX_NAME_LENGTH).toBe(100)
+      expect(INLINE_EDIT_CONFIG.DEBOUNCE_DELAY).toBe(300)
+      expect(INLINE_EDIT_CONFIG.AUTO_SAVE_DELAY).toBe(2000)
+    })
+  })
+
+  describe('validateItemName', () => {
+    it('should validate valid names', () => {
+      const result = validateItemName('Valid Name')
+      expect(result.isValid).toBe(true)
+      expect(result.error).toBeNull()
+    })
+
+    it('should reject names that are too short', () => {
+      const result = validateItemName('')
+      expect(result.isValid).toBe(false)
+      expect(result.error).toBe('Name must be at least 1 character long')
+    })
+
+    it('should reject names that are too long', () => {
+      const longName = 'a'.repeat(101)
+      const result = validateItemName(longName)
+      expect(result.isValid).toBe(false)
+      expect(result.error).toBe('Name must be no more than 100 characters long')
+    })
+
+    it('should handle names with only whitespace', () => {
+      const result = validateItemName('   ')
+      expect(result.isValid).toBe(false)
+      expect(result.error).toBe('Name must be at least 1 character long')
+    })
+
+    it('should handle names at the minimum length', () => {
+      const result = validateItemName('a')
+      expect(result.isValid).toBe(true)
+      expect(result.error).toBeNull()
+    })
+
+    it('should handle names at the maximum length', () => {
+      const maxName = 'a'.repeat(100)
+      const result = validateItemName(maxName)
+      expect(result.isValid).toBe(true)
+      expect(result.error).toBeNull()
+    })
+  })
+
+  describe('sanitizeItemName', () => {
+    it('should trim whitespace', () => {
+      expect(sanitizeItemName('  test  ')).toBe('test')
+    })
+
+    it('should replace multiple spaces with single space', () => {
+      expect(sanitizeItemName('test    name')).toBe('test name')
+    })
+
+    it('should handle tabs and newlines', () => {
+      expect(sanitizeItemName('test\t\nname')).toBe('test name')
+    })
+
+    it('should handle already clean names', () => {
+      expect(sanitizeItemName('clean name')).toBe('clean name')
+    })
+
+    it('should handle empty string', () => {
+      expect(sanitizeItemName('')).toBe('')
+    })
+  })
+
+  describe('handleInlineEditKeyDown', () => {
+    it('should handle Enter key', () => {
+      const event = {
+        key: 'Enter',
+        preventDefault: vi.fn()
+      }
+      const onSave = vi.fn()
+      const onCancel = vi.fn()
+
+      const result = handleInlineEditKeyDown(event, onSave, onCancel)
+
+      expect(result).toBe(true)
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(onSave).toHaveBeenCalled()
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+
+    it('should handle Escape key', () => {
+      const event = {
+        key: 'Escape',
+        preventDefault: vi.fn()
+      }
+      const onSave = vi.fn()
+      const onCancel = vi.fn()
+
+      const result = handleInlineEditKeyDown(event, onSave, onCancel)
+
+      expect(result).toBe(true)
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(onCancel).toHaveBeenCalled()
+      expect(onSave).not.toHaveBeenCalled()
+    })
+
+    it('should allow Tab key to work normally', () => {
+      const event = {
+        key: 'Tab',
+        preventDefault: vi.fn()
+      }
+      const onSave = vi.fn()
+      const onCancel = vi.fn()
+
+      const result = handleInlineEditKeyDown(event, onSave, onCancel)
+
+      expect(result).toBe(false)
+      expect(event.preventDefault).not.toHaveBeenCalled()
+      expect(onSave).not.toHaveBeenCalled()
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+
+    it('should return false for other keys', () => {
+      const event = {
+        key: 'a',
+        preventDefault: vi.fn()
+      }
+      const onSave = vi.fn()
+      const onCancel = vi.fn()
+
+      const result = handleInlineEditKeyDown(event, onSave, onCancel)
+
+      expect(result).toBe(false)
+      expect(event.preventDefault).not.toHaveBeenCalled()
+      expect(onSave).not.toHaveBeenCalled()
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('createDebouncedFunction', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('should debounce function calls', () => {
+      const mockFn = vi.fn()
+      const debouncedFn = createDebouncedFunction(mockFn, 100)
+
+      debouncedFn('arg1')
+      debouncedFn('arg2')
+      debouncedFn('arg3')
+
+      expect(mockFn).not.toHaveBeenCalled()
+
+      vi.advanceTimersByTime(100)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+      expect(mockFn).toHaveBeenCalledWith('arg3')
+    })
+
+    it('should clear previous timeout when called again', () => {
+      const mockFn = vi.fn()
+      const debouncedFn = createDebouncedFunction(mockFn, 100)
+
+      debouncedFn('first')
+      vi.advanceTimersByTime(50)
+      debouncedFn('second')
+      vi.advanceTimersByTime(100)
+
+      expect(mockFn).toHaveBeenCalledTimes(1)
+      expect(mockFn).toHaveBeenCalledWith('second')
+    })
+
+    it('should pass all arguments to the debounced function', () => {
+      const mockFn = vi.fn()
+      const debouncedFn = createDebouncedFunction(mockFn, 100)
+
+      debouncedFn('arg1', 'arg2', 'arg3')
+      vi.advanceTimersByTime(100)
+
+      expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2', 'arg3')
+    })
+
+    it('should work with different delay values', () => {
+      const mockFn = vi.fn()
+      const debouncedFn = createDebouncedFunction(mockFn, 200)
+
+      debouncedFn('test')
+      vi.advanceTimersByTime(100)
+      expect(mockFn).not.toHaveBeenCalled()
+
+      vi.advanceTimersByTime(100)
+      expect(mockFn).toHaveBeenCalledWith('test')
     })
   })
 })

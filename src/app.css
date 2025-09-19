@@ -630,3 +630,91 @@ body {
     height: 20px;
   }
 }
+
+/* ===== INLINE EDITING STYLES ===== */
+
+.item-name {
+  cursor: pointer;
+  position: relative;
+}
+
+.item-name:hover .item-name-text {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.inline-edit-container {
+  position: relative;
+  width: 100%;
+}
+
+.inline-edit-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #0052cc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #172b4d;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.2);
+  transition: all 0.2s ease;
+}
+
+.inline-edit-input:focus {
+  border-color: #0065ff;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+  background: white;
+}
+
+.inline-edit-input.error {
+  border-color: #ff5630;
+  box-shadow: 0 2px 8px rgba(255, 86, 48, 0.2);
+}
+
+.validation-error {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ff5630;
+  color: white;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 0 0 4px 4px;
+  z-index: 20;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.item-name-text {
+  display: block;
+  transition: all 0.2s ease;
+}
+
+/* Prevent editing during drag */
+.timeline-item.dragging .item-name {
+  cursor: default;
+  pointer-events: none;
+}
+
+.timeline-item.dragging .item-name:hover .item-name-text {
+  text-decoration: none;
+  opacity: 1;
+}
+
+/* Responsive inline editing */
+@media (max-width: 768px) {
+  .inline-edit-input {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+  
+  .validation-error {
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+}

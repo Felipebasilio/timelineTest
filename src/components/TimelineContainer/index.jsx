@@ -39,8 +39,32 @@ const TimelineContainer = ({ items, onItemsChange }) => {
   );
   const visibleDays = calculateTotalDays(visibleStart, visibleEnd);
   
+  // Items state management
+  const [timelineItems, setTimelineItems] = useState(items);
+  
+  // Update items when props change
+  useEffect(() => {
+    setTimelineItems(items);
+  }, [items]);
+  
+  // Handle item updates
+  const handleItemUpdate = useCallback((itemId, updates) => {
+    setTimelineItems(prevItems => {
+      const updatedItems = prevItems.map(item => 
+        item.id === itemId ? { ...item, ...updates } : item
+      );
+      
+      // Notify parent component of changes
+      if (onItemsChange) {
+        onItemsChange(updatedItems);
+      }
+      
+      return updatedItems;
+    });
+  }, [onItemsChange]);
+  
   // Assign items to lanes using the provided algorithm
-  const lanes = assignLanes(items);
+  const lanes = assignLanes(timelineItems);
   
   // Zoom control handlers
   const handleZoomIn = useCallback(() => {
@@ -112,21 +136,6 @@ const TimelineContainer = ({ items, onItemsChange }) => {
     }
   }, [handleWheelZoom]);
 
-  // Handle item updates from drag operations
-  const handleItemUpdate = useCallback((itemId, newDates) => {
-    console.log('TimelineContainer handleItemUpdate called:', { itemId, newDates });
-    if (onItemsChange) {
-      const updatedItems = items.map(item => 
-        item.id === itemId 
-          ? { ...item, ...newDates }
-          : item
-      );
-      console.log('Calling onItemsChange with updated items');
-      onItemsChange(updatedItems);
-    } else {
-      console.log('onItemsChange is not available');
-    }
-  }, [items, onItemsChange]);
 
   return (
     <div className="timeline-container" ref={timelineContainerRef}>

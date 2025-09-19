@@ -1,5 +1,13 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { calculateItemPosition, calculateItemPositionWithZoom, createItemTooltip } from '../../utils.js';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { 
+  calculateItemPosition, 
+  calculateItemPositionWithZoom, 
+  createItemTooltip,
+  validateItemName,
+  sanitizeItemName,
+  handleInlineEditKeyDown,
+  createDebouncedFunction
+} from '../../utils.js';
 
 /**
  * TimelineItem component - represents a single item on the timeline with zoom support and drag functionality
@@ -17,7 +25,14 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
   const [dragStartX, setDragStartX] = useState(0);
   const [originalDates, setOriginalDates] = useState({ start: item.start, end: item.end });
   const [previewDates, setPreviewDates] = useState({ start: item.start, end: item.end });
+  
+  // Inline editing state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(item.name);
+  const [validationError, setValidationError] = useState(null);
+  
   const itemRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Use zoom-aware positioning if zoom is not at default level
   const style = zoomLevel === 1.0 
@@ -156,6 +171,93 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // ===== INLINE EDITING FUNCTIONS =====
+
+  // Auto-save function with debouncing
+  const debouncedSave = useCallback(
+    createDebouncedFunction((value) => {
+      if (value !== item.name) {
+        handleSave(value);
+      }
+    }, 2000),
+    [item.name]
+  );
+
+  // Handle starting edit mode
+  const handleStartEdit = useCallback((e) => {
+    e.stopPropagation();
+    if (!isDragging && !isEditing) {
+      setIsEditing(true);
+      setEditValue(item.name);
+      setValidationError(null);
+    }
+  }, [isDragging, isEditing, item.name]);
+
+  // Handle saving changes
+  const handleSave = useCallback((value = editValue) => {
+    const sanitizedValue = sanitizeItemName(value);
+    const validation = validateItemName(sanitizedValue);
+    
+    if (validation.isValid) {
+      if (sanitizedValue !== item.name && onItemUpdate) {
+        onItemUpdate(item.id, { name: sanitizedValue });
+      }
+      setIsEditing(false);
+      setValidationError(null);
+    } else {
+      setValidationError(validation.error);
+    }
+  }, [editValue, item.name, item.id, onItemUpdate]);
+
+  // Handle canceling edit
+  const handleCancel = useCallback(() => {
+    setIsEditing(false);
+    setEditValue(item.name);
+    setValidationError(null);
+  }, [item.name]);
+
+  // Handle input change
+  const handleInputChange = useCallback((event) => {
+    const value = event.target.value;
+    setEditValue(value);
+    
+    // Clear validation error as user types
+    if (validationError) {
+      setValidationError(null);
+    }
+    
+    // Trigger debounced save
+    debouncedSave(value);
+  }, [validationError, debouncedSave]);
+
+  // Handle keyboard events
+  const handleKeyDown = useCallback((event) => {
+    const handled = handleInlineEditKeyDown(event, handleSave, handleCancel);
+    if (handled) {
+      event.stopPropagation();
+    }
+  }, [handleSave, handleCancel]);
+
+  // Handle blur (click outside)
+  const handleBlur = useCallback(() => {
+    handleSave();
+  }, [handleSave]);
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  // Update edit value when item name changes externally
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(item.name);
+    }
+  }, [item.name, isEditing]);
+
   return (
     <div
       ref={itemRef}
@@ -183,7 +285,28 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
       />
       
       <div className="item-content">
-        <div className="item-name">{item.name}</div>
+        <div className="item-name" onClick={handleStartEdit}>
+          {isEditing ? (
+            <div className="inline-edit-container">
+              <input
+                ref={inputRef}
+                type="text"
+                value={editValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
+                className={`inline-edit-input ${validationError ? 'error' : ''}`}
+                maxLength={100}
+                placeholder="Enter item name..."
+              />
+              {validationError && (
+                <div className="validation-error">{validationError}</div>
+              )}
+            </div>
+          ) : (
+            <span className="item-name-text">{item.name}</span>
+          )}
+        </div>
         <div className="item-dates">
           {isDragging ? (
             <div className="preview-dates">

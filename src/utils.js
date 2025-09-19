@@ -322,3 +322,91 @@ export const handleMouseWheelZoom = (event, container, timelineStart, timelineEn
   onZoomChange(newZoom);
   onCenterChange(mousePercent);
 };
+
+// ===== INLINE EDITING FUNCTIONALITY =====
+
+/**
+ * Inline editing configuration
+ */
+export const INLINE_EDIT_CONFIG = {
+  MIN_NAME_LENGTH: 1,
+  MAX_NAME_LENGTH: 100,
+  DEBOUNCE_DELAY: 300, // Delay before saving changes
+  AUTO_SAVE_DELAY: 2000 // Auto-save after 2 seconds of inactivity
+};
+
+/**
+ * Validates a timeline item name
+ * @param {string} name - Name to validate
+ * @returns {Object} Validation result with isValid and error message
+ */
+export const validateItemName = (name) => {
+  const trimmedName = name.trim();
+  
+  if (trimmedName.length < INLINE_EDIT_CONFIG.MIN_NAME_LENGTH) {
+    return {
+      isValid: false,
+      error: `Name must be at least ${INLINE_EDIT_CONFIG.MIN_NAME_LENGTH} character long`
+    };
+  }
+  
+  if (trimmedName.length > INLINE_EDIT_CONFIG.MAX_NAME_LENGTH) {
+    return {
+      isValid: false,
+      error: `Name must be no more than ${INLINE_EDIT_CONFIG.MAX_NAME_LENGTH} characters long`
+    };
+  }
+  
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
+ * Sanitizes a timeline item name
+ * @param {string} name - Name to sanitize
+ * @returns {string} Sanitized name
+ */
+export const sanitizeItemName = (name) => {
+  return name.trim().replace(/\s+/g, ' '); // Remove extra whitespace
+};
+
+/**
+ * Handles keyboard events for inline editing
+ * @param {KeyboardEvent} event - Keyboard event
+ * @param {Function} onSave - Callback for saving changes
+ * @param {Function} onCancel - Callback for canceling editing
+ * @returns {boolean} Whether the event was handled
+ */
+export const handleInlineEditKeyDown = (event, onSave, onCancel) => {
+  switch (event.key) {
+    case 'Enter':
+      event.preventDefault();
+      onSave();
+      return true;
+    case 'Escape':
+      event.preventDefault();
+      onCancel();
+      return true;
+    case 'Tab':
+      // Allow tab to work normally for accessibility
+      return false;
+    default:
+      return false;
+  }
+};
+
+/**
+ * Creates a debounced function for auto-saving
+ * @param {Function} func - Function to debounce
+ * @param {number} delay - Delay in milliseconds
+ * @returns {Function} Debounced function
+ */
+export const createDebouncedFunction = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};

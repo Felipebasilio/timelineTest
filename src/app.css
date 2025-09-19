@@ -123,14 +123,20 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 0 4px;
-  min-width: 120px;
+  min-width: 140px;
   z-index: 1;
+  user-select: none;
 }
 
 .timeline-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
   z-index: 5;
+}
+
+.timeline-item.dragging {
+  z-index: 10;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .timeline-item:nth-child(even) {
@@ -170,12 +176,52 @@ body {
 }
 
 .item-dates {
-  font-size: 11px;
+  font-size: 10px;
   opacity: 0.9;
   font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.normal-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date-start, .date-end {
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.preview-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.preview-start, .preview-end {
+  font-size: 10px;
+  line-height: 1.2;
   white-space: nowrap;
+  font-weight: 600;
+}
+
+.preview-start {
+  color: #4CAF50;
+}
+
+.preview-end {
+  color: #FF9800;
 }
 
 /* Responsive design */
@@ -195,7 +241,7 @@ body {
   }
   
   .timeline-item {
-    min-width: 100px;
+    min-width: 120px;
     height: 48px;
   }
   
@@ -212,17 +258,19 @@ body {
   }
 }
 
-/* For very small timeline items, hide dates to save space */
+/* For very small timeline items, ensure dates are still visible */
 .timeline-item[style*="width: 0%"], 
 .timeline-item[style*="width: 1%"], 
 .timeline-item[style*="width: 2%"] {
-  min-width: 80px;
+  min-width: 120px;
 }
 
+/* Ensure dates are always visible even on small items */
 .timeline-item[style*="width: 0%"] .item-dates, 
 .timeline-item[style*="width: 1%"] .item-dates, 
 .timeline-item[style*="width: 2%"] .item-dates {
-  display: none;
+  display: flex;
+  font-size: 9px;
 }
 
 /* ===== ZOOM CONTROLS ===== */
@@ -500,5 +548,85 @@ body {
   
   .mouse-zoom-text {
     font-size: 9px;
+  }
+}
+
+/* ===== DRAG HANDLES ===== */
+
+.drag-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: ew-resize;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.drag-handle:hover {
+  background: rgba(255, 255, 255, 0.6);
+  width: 12px;
+}
+
+.drag-handle-start {
+  left: 0;
+  border-radius: 6px 0 0 6px;
+}
+
+.drag-handle-end {
+  right: 0;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Drag handle visual indicators */
+.drag-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 1px;
+}
+
+.drag-handle-start::before {
+  left: 3px;
+  transform: translateY(-50%);
+}
+
+.drag-handle-end::before {
+  right: 3px;
+  transform: translateY(-50%);
+}
+
+.drag-handle:hover::before {
+  background: rgba(255, 255, 255, 1);
+  height: 24px;
+}
+
+/* Prevent text selection during drag */
+.timeline-item.dragging .item-content {
+  pointer-events: none;
+}
+
+/* Responsive drag handles */
+@media (max-width: 768px) {
+  .drag-handle {
+    width: 6px;
+  }
+  
+  .drag-handle:hover {
+    width: 10px;
+  }
+  
+  .drag-handle::before {
+    height: 16px;
+  }
+  
+  .drag-handle:hover::before {
+    height: 20px;
   }
 }

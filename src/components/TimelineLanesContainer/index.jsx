@@ -10,8 +10,9 @@ import { TimelineLane } from '../index';
  * @param {number} props.visibleDays - Number of visible days (for zoom)
  * @param {number} props.totalDays - Total number of days in timeline
  * @param {number} props.zoomLevel - Current zoom level
+ * @param {Function} props.onItemUpdate - Callback when item dates are updated
  */
-const TimelineLanesContainer = ({ lanes, timelineStart, visibleStart, visibleDays, totalDays, zoomLevel }) => {
+const TimelineLanesContainer = ({ lanes, timelineStart, visibleStart, visibleDays, totalDays, zoomLevel, onItemUpdate }) => {
   return (
     <div className="timeline-lanes">
       {lanes.map((lane, laneIndex) => (
@@ -24,6 +25,7 @@ const TimelineLanesContainer = ({ lanes, timelineStart, visibleStart, visibleDay
           visibleDays={visibleDays}
           totalDays={totalDays}
           zoomLevel={zoomLevel}
+          onItemUpdate={onItemUpdate}
         />
       ))}
     </div>

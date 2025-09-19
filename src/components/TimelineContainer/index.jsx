@@ -16,8 +16,9 @@ import { TimelineHeader, TimelineRuler, TimelineLanesContainer } from '../index'
  * Handles data processing, zoom state management, and coordinates all timeline sub-components
  * @param {Object} props - Component props
  * @param {Array} props.items - Array of timeline items
+ * @param {Function} props.onItemsChange - Callback when items are updated
  */
-const TimelineContainer = ({ items }) => {
+const TimelineContainer = ({ items, onItemsChange }) => {
   // Calculate timeline boundaries and total days
   const { timelineStart, timelineEnd } = calculateTimelineBoundaries(items);
   const totalDays = calculateTotalDays(timelineStart, timelineEnd);
@@ -111,6 +112,22 @@ const TimelineContainer = ({ items }) => {
     }
   }, [handleWheelZoom]);
 
+  // Handle item updates from drag operations
+  const handleItemUpdate = useCallback((itemId, newDates) => {
+    console.log('TimelineContainer handleItemUpdate called:', { itemId, newDates });
+    if (onItemsChange) {
+      const updatedItems = items.map(item => 
+        item.id === itemId 
+          ? { ...item, ...newDates }
+          : item
+      );
+      console.log('Calling onItemsChange with updated items');
+      onItemsChange(updatedItems);
+    } else {
+      console.log('onItemsChange is not available');
+    }
+  }, [items, onItemsChange]);
+
   return (
     <div className="timeline-container" ref={timelineContainerRef}>
       <TimelineHeader 
@@ -140,6 +157,7 @@ const TimelineContainer = ({ items }) => {
         visibleDays={visibleDays}
         totalDays={totalDays}
         zoomLevel={zoomLevel}
+        onItemUpdate={handleItemUpdate}
       />
     </div>
   );

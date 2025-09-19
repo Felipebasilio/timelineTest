@@ -715,21 +715,6 @@ describe('TimelineItem', () => {
       expect(screen.getByText('Test Item')).toBeInTheDocument()
     })
 
-    it('should handle console.log calls during drag', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-      
-      const { container } = render(<TimelineItem {...mockProps} />)
-      
-      const startHandle = container.querySelector('.drag-handle-start')
-      fireEvent.mouseDown(startHandle, { clientX: 100 })
-      fireEvent.mouseMove(document, { clientX: 150 })
-      fireEvent.mouseUp(document)
-      
-      // Should have logged drag events
-      expect(consoleSpy).toHaveBeenCalled()
-      
-      consoleSpy.mockRestore()
-    })
 
     it('should handle items with same start and end dates', () => {
       const singleDayItem = {

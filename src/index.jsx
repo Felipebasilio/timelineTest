@@ -11,7 +11,6 @@ function App() {
   const [items, setItems] = useState(timelineItems);
 
   const handleItemsChange = (updatedItems) => {
-    console.log('App handleItemsChange called with:', updatedItems);
     setItems(updatedItems);
   };
 

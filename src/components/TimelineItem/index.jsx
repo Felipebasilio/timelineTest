@@ -71,8 +71,6 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('Mouse down on drag handle:', type);
-    
     setIsDragging(true);
     setDragType(type);
     setDragStartX(e.clientX);
@@ -83,21 +81,12 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
   const handleMouseMove = useCallback((e) => {
     if (!isDragging || !itemRef.current) return;
 
-    console.log('Mouse move during drag, isDragging:', isDragging, 'dragType:', dragType);
-
     const deltaX = e.clientX - dragStartX;
     
     // Simple approach: 50 pixels = 1 day
     const daysDelta = Math.round(deltaX / 50);
     
-    console.log('Simple drag info:', {
-      deltaX,
-      daysDelta,
-      dragType
-    });
-    
     if (Math.abs(daysDelta) < 1) {
-      console.log('Days delta too small:', daysDelta);
       return;
     }
 
@@ -129,21 +118,13 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
       end: formatDate(newEnd)
     };
     
-    console.log('Preview dates:', {
-      original: { start: originalDates.start, end: originalDates.end },
-      preview: newPreviewDates
-    });
-    
     setPreviewDates(newPreviewDates);
   }, [isDragging, dragType, dragStartX, originalDates]);
 
   // Handle mouse up to end drag
   const handleMouseUp = useCallback(() => {
-    console.log('Mouse up - ending drag');
-    
     // Apply the preview dates to the actual item
     if (onItemUpdate && (previewDates.start !== originalDates.start || previewDates.end !== originalDates.end)) {
-      console.log('Applying preview dates:', previewDates);
       onItemUpdate(item.id, previewDates);
     }
     
@@ -156,11 +137,9 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
   // Add/remove event listeners based on dragging state
   React.useEffect(() => {
     if (isDragging) {
-      console.log('Adding event listeners for drag');
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     } else {
-      console.log('Removing event listeners');
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     }
@@ -269,7 +248,6 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
       <div 
         className="drag-handle drag-handle-start"
         onMouseDown={(e) => {
-          console.log('Start handle clicked');
           handleMouseDown(e, 'start');
         }}
         style={{ 
@@ -326,7 +304,6 @@ const TimelineItem = ({ item, timelineStart, visibleStart, visibleDays, zoomLeve
       <div 
         className="drag-handle drag-handle-end"
         onMouseDown={(e) => {
-          console.log('End handle clicked');
           handleMouseDown(e, 'end');
         }}
         style={{ 
